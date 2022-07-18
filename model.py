@@ -8,51 +8,49 @@ class DistillationModel(tf.keras.Model):
         self.teacher_model = teacher_model
         self.student_model = student_model
 
-    def compile(self, optimizer, metrics, loss, alpha=0.1, temparature=3):
-        super(DistillationModel, self).__init__()
+    def compile(self, optimizer, metrics, loss, alpha=0.1, temperature=3):
+        super(DistillationModel, self).compile(optimizer=optimizer, metrics=metrics)
         self.loss = loss
         self.alpha = alpha
-        self.temparature = temparature
+        self.temperature = temperature
 
     def train_step(self, data):
         x, y = data
 
-        # Forward pass of teacher
-        logit_teacher = self.teacher(x, training=False)
+        logit_teacher = self.teacher_model(x, training=False)
 
         with tf.GradientTape() as tape:
-            logit_student = self.student(x, training=True)
+            logit_student = self.student_model(x, training=True)
+            total_loss, student_loss, distil_loss = self.loss(logits_student=logit_student,
+                                                              logits_teacher=logit_teacher,
+                                                              labels=y,
+                                                              alpha=0.1,
+                                                              temperature=3)
 
-            student_loss = self.student_loss_fn(y, student_predictions)
+        trainable_vars = self.student_model.trainable_variables
+        gradients = tape.gradient(total_loss, trainable_vars)
 
-            # Compute scaled distillation loss from https://arxiv.org/abs/1503.02531
-            # The magnitudes of the gradients produced by the soft targets scale
-            # as 1/T^2, multiply them by T^2 when using both hard and soft targets.
-            distillation_loss = (
-                    self.distillation_loss_fn(
-                        tf.nn.softmax(teacher_predictions / self.temperature, axis=1),
-                        tf.nn.softmax(student_predictions / self.temperature, axis=1),
-                    )
-                    * self.temperature ** 2
-            )
-
-            loss = self.alpha * student_loss + (1 - self.alpha) * distillation_loss
-
-        # Compute gradients
-        trainable_vars = self.student.trainable_variables
-        gradients = tape.gradient(loss, trainable_vars)
-
-        # Update weights
         self.optimizer.apply_gradients(zip(gradients, trainable_vars))
 
-        # Update the metrics configured in `compile()`.
-        self.compiled_metrics.update_state(y, student_predictions)
+        self.compiled_metrics.update_state(y, logit_student)
 
-        # Return a dict of performance
         results = {m.name: m.result() for m in self.metrics}
-        results.update(
-            {"student_loss": student_loss, "distillation_loss": distillation_loss}
-        )
+        results.update({"student_loss": student_loss,
+                        "distil_loss": distil_loss,
+                        "total_loss": total_loss})
+        return results
+
+    def test_step(self, data):
+        x, y = data
+
+        logits_student = self.student_model(x, training=False)
+
+        student_loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)(y, logits_student)
+
+        self.compiled_metrics.update_state(y, logits_student)
+
+        results = {m.name: m.result() for m in self.metrics}
+        results.update({"student_loss": student_loss})
         return results
 
 

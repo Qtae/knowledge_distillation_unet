@@ -45,5 +45,5 @@ def load_dataset(root_dir, valid_ratio=0.2, is_train=True, normalize=True):
 
 
 def make_one_hot(lbls, classes):
-    labels = tf.one_hot(lbls, classes)
+    labels = tf.one_hot(lbls, classes, dtype=tf.float32)
     return labels
