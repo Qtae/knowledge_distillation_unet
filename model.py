@@ -1,4 +1,4 @@
-import numpy as np
+import os
 import tensorflow as tf
 
 
@@ -8,8 +8,10 @@ class DistillationModel(tf.keras.Model):
         self.teacher_model = teacher_model
         self.student_model = student_model
 
-    def compile(self, optimizer, metrics, loss, alpha=0.1, temperature=3):
+    def compile(self, optimizer, metrics, loss,
+                alpha=0.1, temperature=3):
         super(DistillationModel, self).compile(optimizer=optimizer, metrics=metrics)
+        #self.student_model.compile(optimizer=optimizer, metrics=metrics, loss='binary_crossentropy')
         self.loss = loss
         self.alpha = alpha
         self.temperature = temperature
@@ -17,25 +19,24 @@ class DistillationModel(tf.keras.Model):
     def train_step(self, data):
         x, y = data
 
-        logit_teacher = self.teacher_model(x, training=False)
+        logits_teacher = self.teacher_model(x, training=False)
 
         with tf.GradientTape() as tape:
-            logit_student = self.student_model(x, training=True)
-            total_loss, student_loss, distil_loss = self.loss(logits_student=logit_student,
-                                                              logits_teacher=logit_teacher,
-                                                              labels=y,
-                                                              alpha=0.1,
-                                                              temperature=3)
+            logits_student = self.student_model(x, training=True)
+            normal_loss = tf.keras.losses.BinaryCrossentropy(from_logits=True)(y, logits_student)
+            distil_loss = tf.keras.losses.KLDivergence()(tf.nn.softmax(logits_teacher / self.temperature),
+                                                         tf.nn.softmax(logits_student / self.temperature))
+            total_loss = (1 - self.alpha) * normal_loss + self.alpha * (self.temperature**2) * distil_loss
 
         trainable_vars = self.student_model.trainable_variables
         gradients = tape.gradient(total_loss, trainable_vars)
 
         self.optimizer.apply_gradients(zip(gradients, trainable_vars))
 
-        self.compiled_metrics.update_state(y, logit_student)
+        self.compiled_metrics.update_state(y, tf.nn.softmax(logits_student))
 
         results = {m.name: m.result() for m in self.metrics}
-        results.update({"student_loss": student_loss,
+        results.update({"student_loss": normal_loss,
                         "distil_loss": distil_loss,
                         "total_loss": total_loss})
         return results
@@ -45,9 +46,9 @@ class DistillationModel(tf.keras.Model):
 
         logits_student = self.student_model(x, training=False)
 
-        student_loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)(y, logits_student)
+        student_loss = tf.keras.losses.BinaryCrossentropy(from_logits=True)(y, logits_student)
 
-        self.compiled_metrics.update_state(y, logits_student)
+        self.compiled_metrics.update_state(y, tf.nn.softmax(logits_student))
 
         results = {m.name: m.result() for m in self.metrics}
         results.update({"student_loss": student_loss})
@@ -144,9 +145,7 @@ def unet_logit(input_layer, classes, init_depth=16):
 
     output_conv = tf.keras.layers.Conv2D(classes, 1, padding='same', kernel_initializer='he_normal')(conv9)
 
-    output_sftmx = tf.keras.activations.softmax(output_conv)
-
-    model = tf.keras.models.Model(inputs=input_layer, outputs=output_sftmx)
+    model = tf.keras.models.Model(inputs=input_layer, outputs=output_conv)
     return model
 
 if __name__=="__main__":

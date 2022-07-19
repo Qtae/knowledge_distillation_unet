@@ -5,6 +5,7 @@ from datetime import datetime
 from model import unet_logit, DistillationModel
 from data import load_dataset, make_one_hot
 from loss import distillation_loss
+from callbacks import CheckPoint
 from tensorflow.python.data.ops.dataset_ops import AUTOTUNE
 
 
@@ -16,6 +17,8 @@ if __name__ == '__main__':
     batch_size = 1
     learning_rate = 0.001
     model_save_dir = 'D:/Work/01_Knowledge_Distillation/model_student/model(' + start_time + ')'
+    check_point_save_dir = 'D:/Work/01_Knowledge_Distillation/model_student/checkpoints/' + start_time
+    os.mkdir(check_point_save_dir)
 
     ##load dataset
     print('-----------------------load dataset-----------------------')
@@ -59,18 +62,23 @@ if __name__ == '__main__':
     input_layer = tf.keras.layers.Input([640, 640, 1])
     student_model = unet_logit(input_layer, classes=classes, init_depth=16)
     #model
-    model = DistillationModel(teacher_model, student_model)
-    model.compile(optimizer=tf.keras.optimizers.Adam(),
-                  metrics=[tf.keras.metrics.CategoricalAccuracy()],
+    model = DistillationModel(teacher_model=teacher_model, student_model=student_model)
+    metric = tf.keras.metrics.CategoricalAccuracy()
+    monitor_metric_name = 'val_categorical_accuracy'
+    #metric = tf.keras.metrics.Accuracy()
+    #monitor_metric_name = 'val_accuracy'
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+                  metrics=[metric],
                   loss=distillation_loss,
-                  alpha=0.1,
-                  temperature=10)
+                  alpha=0.5,
+                  temperature=3)
     #callbacks
-    early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_categorical_accuracy',
-                                                      patience=10, mode='auto')
-    reduce = tf.keras.callbacks.ReduceLROnPlateau(monitor='val_categorical_accuracy', factor=0.9, patience=5,
+    early_stopping = tf.keras.callbacks.EarlyStopping(monitor=monitor_metric_name,
+                                                      patience=20, mode='auto')
+    reduce = tf.keras.callbacks.ReduceLROnPlateau(monitor=monitor_metric_name, factor=0.9, patience=5,
                                                   cooldown=10, min_lr=0.00001, mode='auto')
-    callbacks_list = [early_stopping, reduce]
+    checkpoint = CheckPoint(checkpoint_dir=check_point_save_dir)
+    callbacks_list = [early_stopping, reduce, checkpoint]
 
     ##train
     history = model.fit(train_dataset,
