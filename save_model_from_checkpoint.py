@@ -10,7 +10,7 @@ if __name__ == '__main__':
     learning_rate = 0.001
     input_layer = tf.keras.layers.Input([640, 640, 1])
     model_save_dir = 'D:/Work/01_Knowledge_Distillation/model_student/model(' + start_time + ')'
-    checkpoint_path = 'D:/Work/01_Knowledge_Distillation/model_student/checkpoints/asdf.hdf5'
+    checkpoint_path = 'D:/Work/01_Knowledge_Distillation/model_student/checkpoints/2022_07_18-21_44_31_T_4/Unet_Student_e035-acc0.9745-val_acc0.9772-val_loss0.0438.hdf5'
 
     ##build model
     print('-----------------------build model------------------------')

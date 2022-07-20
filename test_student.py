@@ -12,7 +12,7 @@ if __name__ == '__main__':
     classes = 2
     batch_size = 2
     input_layer = tf.keras.layers.Input([640, 640, 1])
-    model_path = 'D:/Work/01_Knowledge_Distillation/model_student/model(2022_07_12-22_28_50)'
+    model_path = 'D:/Work/01_Knowledge_Distillation/model_student/model(2022_07_19-20_38_26)_T4'
 
     ##load dataset
     print('-----------------------load dataset-----------------------')
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     i = 0
     while True:
         batch_images = test_images[0:2, :, :, :]
-        pred_res = model.predict(batch_images)
+        pred_res = tf.nn.softmax(model.predict(batch_images))
         pred_res = tf.where(pred_res > 0.5, 1, 0)
         pred_res = np.argmax(pred_res, -1)
 

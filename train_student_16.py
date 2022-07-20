@@ -71,7 +71,8 @@ if __name__ == '__main__':
                   metrics=[metric],
                   loss=distillation_loss,
                   alpha=0.5,
-                  temperature=3)
+                  temperature=10)
+
     #callbacks
     early_stopping = tf.keras.callbacks.EarlyStopping(monitor=monitor_metric_name,
                                                       patience=20, mode='auto')

@@ -12,7 +12,7 @@ if __name__ == '__main__':
     classes = 2
     batch_size = 2
     input_layer = tf.keras.layers.Input([640, 640, 1])
-    model_path = 'D:/Work/01_Knowledge_Distillation/model_teacher/model(2022_07_14-13_44_00)'
+    model_path = 'D:/Work/01_Knowledge_Distillation/model_teacher/model(2022_07_14-13_44_00)_teacher_F'
 
     ##load dataset
     print('-----------------------load dataset-----------------------')
