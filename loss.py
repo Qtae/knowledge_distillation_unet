@@ -2,7 +2,7 @@ import tensorflow as tf
 
 
 def distillation_loss(logits_student, logits_teacher, labels, alpha, temperature):
-    normal_loss_func = tf.keras.losses.BinaryCrossentropy(from_logits=True)
+    normal_loss_func = tf.keras.losses.tf.keras.losses.CategoricalCrossentropy(from_logits=True)
     normal_loss = normal_loss_func(labels, logits_student)
     softmx_teacher = tf.nn.softmax(logits_teacher / temperature)
     softmx_student = tf.nn.softmax(logits_student / temperature)

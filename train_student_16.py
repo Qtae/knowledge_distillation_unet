@@ -14,16 +14,16 @@ if __name__ == '__main__':
     start_time = datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
     classes = 2
     epochs = 200
-    batch_size = 1
+    batch_size = 2
     learning_rate = 0.001
-    model_save_dir = 'D:/Work/01_Knowledge_Distillation/model_student/model(' + start_time + ')'
-    check_point_save_dir = 'D:/Work/01_Knowledge_Distillation/model_student/checkpoints/' + start_time
+    model_save_dir = 'D:/Public/qtkim/Knowledge_Distillation/model_student/model(' + start_time + ')'
+    check_point_save_dir = 'D:/Public/qtkim/Knowledge_Distillation/model_student/checkpoints/' + start_time
     os.mkdir(check_point_save_dir)
 
     ##load dataset
     print('-----------------------load dataset-----------------------')
-    root_dir = 'D:/Work/01_Knowledge_Distillation/data/train'
-    train_images, train_labels, valid_images, valid_labels = load_dataset(root_dir)
+    root_dir = 'D:/Public/qtkim/Knowledge_Distillation/data/train'
+    train_images, train_labels, valid_images, valid_labels = load_dataset(root_dir, valid_ratio=0.1)
     img_num = train_images.shape[0]
     val_img_num = valid_images.shape[0]
     steps_per_epoch = int(img_num/batch_size) + bool(img_num%batch_size)
@@ -53,33 +53,36 @@ if __name__ == '__main__':
 
     ##build model
     #teacher model
-    teacher_model_path = 'D:/Work/01_Knowledge_Distillation/model_teacher/model(2022_07_14-13_44_00)_teacher_F'
+    teacher_model_path = 'D:/Public/qtkim/Knowledge_Distillation/model_teacher/model(2022_08_01)_e113'
     teacher_model = tf.keras.models.load_model(teacher_model_path)
     input_t = teacher_model.input
-    output_t = teacher_model.layers[31].output
+    output_t = teacher_model.layers[35].output
     teacher_model = tf.keras.models.Model(input_t, output_t)
     #student model
     input_layer = tf.keras.layers.Input([640, 640, 1])
     student_model = unet_logit(input_layer, classes=classes, init_depth=16)
     #model
     model = DistillationModel(teacher_model=teacher_model, student_model=student_model)
-    metric = tf.keras.metrics.CategoricalAccuracy()
-    monitor_metric_name = 'val_categorical_accuracy'
+    metric = 'accuracy'
+    monitor_metric_name = 'val_accuracy'
     #metric = tf.keras.metrics.Accuracy()
     #monitor_metric_name = 'val_accuracy'
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
                   metrics=[metric],
                   loss=distillation_loss,
-                  alpha=0.5,
-                  temperature=10)
+                  alpha=0.25,
+                  temperature=8)
+
+    #for transfer learning
+    #model.student_model.load_weights("D:/Public/qtkim/Knowledge_Distillation/model_student/checkpoints/2022_08_01-15_01_11/Unet_Student_e113-acc0.9626-val_acc0.9643-val_loss0.2462.hdf5")
 
     #callbacks
     early_stopping = tf.keras.callbacks.EarlyStopping(monitor=monitor_metric_name,
                                                       patience=20, mode='auto')
-    reduce = tf.keras.callbacks.ReduceLROnPlateau(monitor=monitor_metric_name, factor=0.9, patience=5,
+    reduce_rl = tf.keras.callbacks.ReduceLROnPlateau(monitor=monitor_metric_name, factor=0.7, patience=5,
                                                   cooldown=10, min_lr=0.00001, mode='auto')
     checkpoint = CheckPoint(checkpoint_dir=check_point_save_dir)
-    callbacks_list = [early_stopping, reduce, checkpoint]
+    callbacks_list = [early_stopping, reduce_rl, checkpoint]
 
     ##train
     history = model.fit(train_dataset,
@@ -92,4 +95,3 @@ if __name__ == '__main__':
                         initial_epoch=0)
 
     model.student_model.save(model_save_dir)
-

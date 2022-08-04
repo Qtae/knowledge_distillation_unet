@@ -12,11 +12,11 @@ if __name__ == '__main__':
     classes = 2
     batch_size = 2
     input_layer = tf.keras.layers.Input([640, 640, 1])
-    model_path = 'D:/Work/01_Knowledge_Distillation/model_student/model(2022_07_19-20_38_26)_T4'
+    model_path = 'D:/Public/qtkim/Knowledge_Distillation/model_student/model(2022_07_31-21_03_33)'
 
     ##load dataset
     print('-----------------------load dataset-----------------------')
-    root_dir = 'D:/Work/01_Knowledge_Distillation/data/test'
+    root_dir = 'D:/Public/qtkim/Knowledge_Distillation/data/test'
     test_images, test_labels, _, _ = load_dataset(root_dir, is_train=False)
     test_images = np.expand_dims(test_images, axis=3)
     test_images = tf.constant(test_images, dtype=tf.float32)
@@ -27,13 +27,13 @@ if __name__ == '__main__':
 
     ##test
     print('--------------------------test---------------------------')
-    test_result_dir = 'D:/Work/01_Knowledge_Distillation/test_result_student/' + start_time
+    test_result_dir = 'D:/Public/qtkim/Knowledge_Distillation/test_result_student/' + start_time
     os.mkdir(test_result_dir)
     i = 0
     while True:
         batch_images = test_images[0:2, :, :, :]
         pred_res = tf.nn.softmax(model.predict(batch_images))
-        pred_res = tf.where(pred_res > 0.5, 1, 0)
+        pred_res = tf.where(pred_res > 0.8, 1, 0)
         pred_res = np.argmax(pred_res, -1)
 
         img1 = np.array(batch_images[0], dtype=np.float32) * 255

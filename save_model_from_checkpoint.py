@@ -1,7 +1,7 @@
 import os
 import tensorflow as tf
 from datetime import datetime
-from model import unet_logit
+from model import unet_logit, unet
 
 if __name__ == '__main__':
     print('==================teacher model training==================')
@@ -9,14 +9,14 @@ if __name__ == '__main__':
     classes = 2
     learning_rate = 0.001
     input_layer = tf.keras.layers.Input([640, 640, 1])
-    model_save_dir = 'D:/Work/01_Knowledge_Distillation/model_student/model(' + start_time + ')'
-    checkpoint_path = 'D:/Work/01_Knowledge_Distillation/model_student/checkpoints/2022_07_18-21_44_31_T_4/Unet_Student_e035-acc0.9745-val_acc0.9772-val_loss0.0438.hdf5'
+    model_save_dir = 'D:/Public/qtkim/Knowledge_Distillation/model_student/model(' + start_time + ')_e113'
+    checkpoint_path = 'D:/Public/qtkim/Knowledge_Distillation/model_student/checkpoints/Unet_Student_e073-acc0.9938-val_acc0.9826-val_loss1.3583.hdf5'
 
     ##build model
     print('-----------------------build model------------------------')
     teacher_model = unet_logit(input_layer, classes=classes, init_depth=16)
     teacher_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-                          loss='binary_crossentropy',
+                          loss='categorical_crossentropy',
                           metrics=['accuracy'])
     teacher_model.load_weights(checkpoint_path)
 

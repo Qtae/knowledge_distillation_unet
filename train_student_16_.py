@@ -15,8 +15,8 @@ if __name__ == '__main__':
     batch_size = 1
     learning_rate = 0.001
     input_layer = tf.keras.layers.Input([640, 640, 1])
-    model_save_dir = 'D:/Work/01_Knowledge_Distillation/model_student/model(' + start_time + ')'
-    teacher_model_path = 'D:/Work/01_Knowledge_Distillation/model_teacher/model(2022_07_14-13_44_00)_teacher_F'
+    model_save_dir = 'D:/Public/qtkim/Knowledge_Distillation/model_student/model(' + start_time + ')'
+    teacher_model_path = 'D:/Public/qtkim/Knowledge_Distillation/model_teacher/model(2022_07_14-13_44_00)_teacher_F'
     teacher_model = tf.keras.models.load_model(teacher_model_path)
     input_t = teacher_model.input
     output_t = teacher_model.layers[31].output
@@ -25,7 +25,7 @@ if __name__ == '__main__':
 
     ##load dataset
     print('-----------------------load dataset-----------------------')
-    root_dir = 'D:/Work/01_Knowledge_Distillation/data/train'
+    root_dir = 'D:/Public/qtkim/Knowledge_Distillation/data/train'
     train_images, train_labels, valid_images, valid_labels = load_dataset(root_dir)
     img_num = train_images.shape[0]
     val_img_num = valid_images.shape[0]
