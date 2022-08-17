@@ -7,17 +7,18 @@ from data import load_dataset
 from tensorflow.python.data.ops.dataset_ops import AUTOTUNE
 
 if __name__ == '__main__':
+    root_dir = 'D:/Public/qtkim/Knowledge_Distillation/'
     print('====================teacher model test====================')
     start_time = datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
     classes = 2
     batch_size = 2
     input_layer = tf.keras.layers.Input([640, 640, 1])
-    model_path = 'D:/Public/qtkim/Knowledge_Distillation/model_teacher/model(2022_08_01)_e113'
+    model_path = root_dir + 'model_teacher/model(2022_08_01)_e113'
 
     ##load dataset
     print('-----------------------load dataset-----------------------')
-    root_dir = 'D:/Public/qtkim/Knowledge_Distillation/data/test'
-    test_images, test_labels, _, _ = load_dataset(root_dir, is_train=False)
+    data_dir = root_dir + 'data/test'
+    test_images, test_labels, _, _ = load_dataset(data_dir, is_train=False)
     test_images = np.expand_dims(test_images, axis=3)
     test_images = tf.constant(test_images, dtype=tf.float32)
 
@@ -27,7 +28,7 @@ if __name__ == '__main__':
 
     ##test
     print('--------------------------test---------------------------')
-    test_result_dir = 'D:/Public/qtkim/Knowledge_Distillation/test_result_teacher/' + start_time
+    test_result_dir = root_dir + 'test_result_teacher/' + start_time
     os.mkdir(test_result_dir)
     i = 0
     while True:

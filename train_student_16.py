@@ -10,20 +10,21 @@ from tensorflow.python.data.ops.dataset_ops import AUTOTUNE
 
 
 if __name__ == '__main__':
+    root_dir = 'D:/Public/qtkim/Knowledge_Distillation/'
     print('==================student model training==================')
     start_time = datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
     classes = 2
     epochs = 200
     batch_size = 2
     learning_rate = 0.001
-    model_save_dir = 'D:/Public/qtkim/Knowledge_Distillation/model_student/model(' + start_time + ')'
-    check_point_save_dir = 'D:/Public/qtkim/Knowledge_Distillation/model_student/checkpoints/' + start_time
+    model_save_dir = root_dir + 'model_student/model(' + start_time + ')'
+    check_point_save_dir = root_dir + 'model_student/checkpoints/' + start_time
     os.mkdir(check_point_save_dir)
 
     ##load dataset
     print('-----------------------load dataset-----------------------')
-    root_dir = 'D:/Public/qtkim/Knowledge_Distillation/data/train'
-    train_images, train_labels, valid_images, valid_labels = load_dataset(root_dir, valid_ratio=0.1)
+    data_dir = root_dir + 'data/train'
+    train_images, train_labels, valid_images, valid_labels = load_dataset(data_dir, valid_ratio=0.1)
     img_num = train_images.shape[0]
     val_img_num = valid_images.shape[0]
     steps_per_epoch = int(img_num/batch_size) + bool(img_num%batch_size)
@@ -53,7 +54,7 @@ if __name__ == '__main__':
 
     ##build model
     #teacher model
-    teacher_model_path = 'D:/Public/qtkim/Knowledge_Distillation/model_teacher/model(2022_08_01)_e113'
+    teacher_model_path = root_dir + 'model_teacher/model(2022_08_01)_e113'
     teacher_model = tf.keras.models.load_model(teacher_model_path)
     input_t = teacher_model.input
     output_t = teacher_model.layers[35].output

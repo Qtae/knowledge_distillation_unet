@@ -13,9 +13,9 @@ def shuffle(train_set):
     return [list(image), list(label)]
 
 
-def load_dataset(root_dir, valid_ratio=0.2, is_train=True, normalize=True):
-    img_dir = os.path.join(root_dir, 'image')
-    lbl_dir = os.path.join(root_dir, 'label')
+def load_dataset(data_dir, valid_ratio=0.2, is_train=True, normalize=True):
+    img_dir = os.path.join(data_dir, 'image')
+    lbl_dir = os.path.join(data_dir, 'label')
     img_files = [os.path.join(img_dir, f) for f in os.listdir(img_dir) if f.endswith(('.png', '.jpeg', 'jpg', '.bmp'))]
     lbl_files = [os.path.join(lbl_dir, f) for f in os.listdir(lbl_dir) if f.endswith(('.png', '.jpeg', 'jpg', '.bmp'))]
     img_num = len(img_files)

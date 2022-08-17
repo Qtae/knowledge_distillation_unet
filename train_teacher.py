@@ -6,6 +6,7 @@ from data import load_dataset, make_one_hot
 from tensorflow.python.data.ops.dataset_ops import AUTOTUNE
 
 if __name__ == '__main__':
+    root_dir = 'D:/Public/qtkim/Knowledge_Distillation/'
     print('==================teacher model training==================')
     start_time = datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
     classes = 2
@@ -13,12 +14,12 @@ if __name__ == '__main__':
     batch_size = 4
     learning_rate = 0.001
     input_layer = tf.keras.layers.Input([640, 640, 1])
-    model_save_dir = 'D:/Public/qtkim/Knowledge_Distillation/model_teacher/model(' + start_time + ')'
+    model_save_dir = root_dir + 'model_teacher/model(' + start_time + ')'
 
     ##load dataset
     print('-----------------------load dataset-----------------------')
-    root_dir = 'D:/Public/qtkim/Knowledge_Distillation/data/train'
-    train_images, train_labels, valid_images, valid_labels = load_dataset(root_dir, valid_ratio=0.1)
+    data_dir = root_dir + 'data/train'
+    train_images, train_labels, valid_images, valid_labels = load_dataset(data_dir, valid_ratio=0.1)
     img_num = train_images.shape[0]
     val_img_num = valid_images.shape[0]
     steps_per_epoch = int(img_num/batch_size) + bool(img_num%batch_size)
@@ -52,7 +53,7 @@ if __name__ == '__main__':
 
     ##callbacks
     #checkpoint
-    check_point_save_dir = 'D:/Public/qtkim/Knowledge_Distillation/model_teacher/checkpoints/' + start_time
+    check_point_save_dir = root_dir + 'model_teacher/checkpoints/' + start_time
     os.mkdir(check_point_save_dir)
     check_point_filename = 'Unet_Teacher_e{epoch:03d}-acc{accuracy:.2f}-val_acc{val_accuracy:.2f}.hdf5'
     checkpoint = tf.keras.callbacks.ModelCheckpoint(os.path.join(check_point_save_dir, check_point_filename),
