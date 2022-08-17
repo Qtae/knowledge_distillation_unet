@@ -8,11 +8,9 @@ class DistillationModel(tf.keras.Model):
         self.teacher_model = teacher_model
         self.student_model = student_model
 
-    def compile(self, optimizer, metrics, loss,
-                alpha=0.1, temperature=3):
+    def compile(self, optimizer, metrics, loss, alpha=0.1, temperature=3):
         super(DistillationModel, self).compile(optimizer=optimizer, metrics=metrics)
         #self.student_model.compile(optimizer=optimizer, metrics=metrics, loss='binary_crossentropy')
-        self.compiled_metrics
         self.loss = loss
         self.alpha = alpha
         self.temperature = temperature

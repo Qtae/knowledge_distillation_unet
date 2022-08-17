@@ -6,7 +6,7 @@ from data import load_dataset, make_one_hot
 from tensorflow.python.data.ops.dataset_ops import AUTOTUNE
 
 if __name__ == '__main__':
-    root_dir = 'D:/Public/qtkim/Knowledge_Distillation/'
+    root_dir = 'D:/Work/01_Knowledge_Distillation/'
     print('==================teacher model training==================')
     start_time = datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
     classes = 2

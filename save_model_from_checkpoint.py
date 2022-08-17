@@ -4,7 +4,7 @@ from datetime import datetime
 from model import unet_logit, unet
 
 if __name__ == '__main__':
-    root_dir = 'D:/Public/qtkim/Knowledge_Distillation/'
+    root_dir = 'D:/Work/01_Knowledge_Distillation/'
     print('==================teacher model training==================')
     start_time = datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
     classes = 2

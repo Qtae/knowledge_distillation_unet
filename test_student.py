@@ -7,7 +7,7 @@ from data import load_dataset
 from tensorflow.python.data.ops.dataset_ops import AUTOTUNE
 
 if __name__ == '__main__':
-    root_dir = 'D:/Public/qtkim/Knowledge_Distillation/'
+    root_dir = 'D:/Work/01_Knowledge_Distillation/'
     print('====================student model test====================')
     start_time = datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
     classes = 2
